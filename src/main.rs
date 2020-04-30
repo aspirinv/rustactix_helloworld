@@ -7,13 +7,13 @@ use controller::customer_controller;
 
 #[get("/{filename}")]
 async fn files(req: HttpRequest) -> impl Responder {
-    let path: std::path::PathBuf = ("src/assets/".to_owned() + req.match_info().query("filename")).parse().unwrap();
+    let path: std::path::PathBuf = ("src/front/dist/front/".to_owned() + req.match_info().query("filename")).parse().unwrap();
     fs::NamedFile::open(path)
 }
 
 #[get("/")]
 async fn index() -> impl Responder {
-    fs::NamedFile::open("src/assets/index.html")
+    fs::NamedFile::open("src/front/dist/front/index.html")
 }
 
 #[actix_rt::main]
