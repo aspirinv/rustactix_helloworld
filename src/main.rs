@@ -1,27 +1,27 @@
-use actix_web::{Result, get, web, App, HttpServer};
-use actix_web::web::{ Json };
+use actix_web::{get, App, HttpServer, HttpRequest, Responder};
+use actix_files as fs;
 
 mod domain;
-use domain::customer::{ Customer };
+mod controller;
+use controller::customer_controller;
 
-#[get("customer/{id}/{name}")]
-async fn get_customer(info: web::Path<(u32, String)>) -> Result<Json<Customer>> {
-    Ok(web::Json(Customer{
-        name: info.1.to_string(),
-        id: info.0
-    }))
+#[get("/{filename}")]
+async fn files(req: HttpRequest) -> impl Responder {
+    let path: std::path::PathBuf = ("src/assets/".to_owned() + req.match_info().query("filename")).parse().unwrap();
+    fs::NamedFile::open(path)
 }
 
 #[get("/")]
-async fn index() -> &'static str {
-    "Welcome!!!"
+async fn index() -> impl Responder {
+    fs::NamedFile::open("src/assets/index.html")
 }
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| App::new()
-            .service(index)
-            .service(get_customer))
+        .service(index)
+        .service(files)
+        .service(customer_controller::get_customer))
         .bind("127.0.0.1:58080")?
         .run()
         .await
